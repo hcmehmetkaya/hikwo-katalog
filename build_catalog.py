@@ -245,7 +245,16 @@ def build_html(products, now):
     max_off = round(max(disc) * 100) if disc else 0
     cheapest = min(p["price"] for p in products)
     newest = sorted(products, key=lambda p: -p["pid"])
-    mosaic = "".join(f'<div class="m"><img src="{p["imgdata"]}" alt=""></div>' for p in [x for x in newest if x.get("imgdata")][:9])
+    pics = [x for x in newest if x.get("imgdata")] or [{"imgdata": ""}]
+    wall, k = "", 0
+    for c in range(4):
+        for r in range(4):
+            p = pics[k % len(pics)]; k += 1
+            top = r * 77 + (34 if c % 2 else 0)
+            img = f'<img src="{p["imgdata"]}" alt="">' if p["imgdata"] else ""
+            wall += f'<div class="w" style="left:{c*61+10}mm;top:{top}mm">{img}</div>'
+    t_words = TITLE.split()
+    t_main, t_last = " ".join(t_words[:-1]), t_words[-1]
     toc = "".join(f'<a class="toc-row" href="#s{i}"><span class="toc-p" data-t="#s{i}"></span><span class="toc-c">{len(l)} ürün</span><span class="toc-n">{e(t)}</span></a>'
                   for i, (t, _, l) in enumerate(secs))
     new_cards = "".join(card(p) for p in newest[:9])
@@ -264,6 +273,10 @@ def build_html(products, now):
 @font-face{{font-family:IX;src:url({fonts}/inter-latin-ext-600-normal.woff);font-weight:600}}
 @font-face{{font-family:FL;src:url({fonts}/fraunces-latin-600-normal.woff);font-weight:600}}
 @font-face{{font-family:FX;src:url({fonts}/fraunces-latin-ext-600-normal.woff);font-weight:600}}
+@font-face{{font-family:FL;src:url({fonts}/fraunces-latin-700-normal.woff);font-weight:700}}
+@font-face{{font-family:FX;src:url({fonts}/fraunces-latin-ext-700-normal.woff);font-weight:700}}
+@font-face{{font-family:FL;src:url({fonts}/fraunces-latin-500-italic.woff);font-weight:500;font-style:italic}}
+@font-face{{font-family:FX;src:url({fonts}/fraunces-latin-ext-500-italic.woff);font-weight:500;font-style:italic}}
 :root{{--ink:#1d1b18;--stone:#f3efe8;--sand:#e4ddd1;--mute:#6e685f;--acc:#0e5a57;--sale:#b6412a}}
 @page{{size:A4;margin:16mm 13mm 18mm;
   @bottom-left{{content:"hikwo.com · {e(TITLE)}";font:500 7.5pt IL,IX,sans-serif;color:#8a8379}}
@@ -275,16 +288,22 @@ def build_html(products, now):
 body{{margin:0;font:400 9pt/1.4 IL,IX,sans-serif;color:var(--ink)}}
 a{{color:inherit;text-decoration:none}}
 h1,h2,.serif{{font-family:FL,FX,serif;font-weight:600}}
-.cover{{page:cover;height:297mm;background:var(--ink);color:var(--stone);position:relative;overflow:hidden}}
-.mos{{position:absolute;top:0;left:0;right:0;height:172mm;display:flex;flex-wrap:wrap}}
-.m{{width:33.333%;height:57.33mm;overflow:hidden;border-right:1.2mm solid var(--ink);border-bottom:1.2mm solid var(--ink)}}
-.m img{{width:100%;height:100%;object-fit:cover;display:block}}
-.ct{{position:absolute;left:16mm;right:16mm;top:184mm}}
-.brand{{font:600 11pt IL,IX,sans-serif;letter-spacing:.32em;color:#c7bfb2;margin:0 0 6mm}}
-.cover h1{{font-size:44pt;line-height:1.02;margin:0 0 7mm;color:#fff}}
-.lead{{font-size:12pt;color:#d8d1c5;margin:0;max-width:150mm}}
-.facts{{position:absolute;left:16mm;right:16mm;bottom:16mm;display:flex;border-top:.3mm solid #4a463f;padding-top:5mm}}
-.f{{flex:1}}.f b{{display:block;font:600 20pt FL,FX,serif;color:#fff}}.f span{{font-size:8.5pt;color:#b6ae9f}}
+.cover{{page:cover;height:297mm;background:#141210;color:#fff;position:relative;overflow:hidden}}
+.wall{{position:absolute;left:-26mm;top:-58mm;width:262mm;height:250mm;transform:rotate(-9deg)}}
+.w{{position:absolute;width:56mm;height:72mm;border-radius:5mm;overflow:hidden;background:#2a2621}}
+.w img{{width:100%;height:100%;object-fit:cover;display:block}}
+.fade{{position:absolute;left:0;right:0;top:0;height:297mm;background:linear-gradient(180deg,rgba(20,18,16,.8) 0%,rgba(20,18,16,0) 13%,rgba(20,18,16,0) 32%,rgba(20,18,16,.88) 46%,#141210 58%)}}
+.topbar{{position:absolute;top:13mm;left:16mm;right:16mm;height:9mm}}
+.brand{{font:600 10.5pt IL,IX,sans-serif;letter-spacing:.34em;color:#fff;margin:0;position:absolute;left:0;top:2mm}}
+.pill{{position:absolute;right:0;top:0;font:500 8.5pt IL,IX,sans-serif;color:#e8e2d8;background:rgba(20,18,16,.72);border:.3mm solid rgba(255,255,255,.22);border-radius:6mm;padding:2mm 4.5mm 2mm 3.5mm}}
+.pill i{{display:inline-block;width:2.2mm;height:2.2mm;border-radius:50%;background:#5fd0c4;margin-right:2mm;vertical-align:.2mm}}
+.ct{{position:absolute;left:16mm;right:16mm;top:166mm}}
+.cover h1{{font:700 52pt/0.98 FL,FX,serif;margin:0 0 6mm;color:#fff;letter-spacing:-.5pt}}
+.cover h1 em{{display:block;font-style:italic;font-weight:500;color:#5fd0c4}}
+.lead{{font-size:12pt;line-height:1.5;color:#cfc7ba;margin:0;max-width:128mm}}
+.facts{{position:absolute;left:16mm;right:16mm;bottom:17mm;display:flex;border-top:.3mm solid #3c3832;padding-top:6mm}}
+.f{{flex:1}}.f b{{display:block;font:700 22pt/1.05 FL,FX,serif;color:#fff}}.f span{{font-size:8.5pt;color:#a59d90}}
+.f.hl b{{color:#5fd0c4}}
 .intro{{page-break-before:always}}
 .intro h2{{font-size:26pt;margin:0 0 3mm}}
 .intro .sub{{color:var(--mute);margin:0 0 8mm;font-size:10pt}}
@@ -317,13 +336,14 @@ h1,h2,.serif{{font-family:FL,FX,serif;font-weight:600}}
 .btn{{align-self:flex-start;display:inline-block;margin-top:8mm;background:#fff;color:var(--acc);font-weight:600;font-size:13pt;padding:4mm 9mm;border-radius:10mm}}
 .small{{margin-top:14mm;font-size:8.5pt;color:#a9d0cb}}
 </style></head><body>
-<div class="cover"><div class="mos">{mosaic}</div>
-<div class="ct"><p class="brand">HIKWO</p><h1>{e(TITLE)}</h1>
-<p class="lead">Taş tozu, alçı ve mum dökümü için silikon kalıplar. Ürün görsellerine dokunarak doğrudan sipariş sayfasına gidebilirsiniz.</p></div>
+<div class="cover"><div class="wall">{wall}</div><div class="fade"></div>
+<div class="topbar"><p class="brand">HIKWO</p><span class="pill"><i></i>Her gün güncellenir · {date}</span></div>
+<div class="ct"><h1>{e(t_main)}<em>{e(t_last)}</em></h1>
+<p class="lead">Taş tozu, alçı ve mum dökümü için {len(products)} silikon kalıp. Ürünlere dokunun, sipariş sayfası açılsın.</p></div>
 <div class="facts"><div class="f"><b>{len(products)}</b><span>ürün</span></div>
-<div class="f"><b>%{max_off}</b><span>en yüksek indirim</span></div>
+<div class="f hl"><b>%{max_off}</b><span>en yüksek indirim</span></div>
 <div class="f"><b>{fmt_tl(cheapest).replace(",00","")}</b><span>başlayan fiyatlar</span></div>
-<div class="f"><b>{date}</b><span>güncel fiyatlar</span></div></div></div>
+<div class="f"><b>{len(secs)}</b><span>bölüm</span></div></div></div>
 <div class="intro"><h2>İçindekiler</h2><p class="sub">Fiyatlar {date} tarihinde hikwo.com'dan alınmıştır; katalog her gün otomatik güncellenir.</p>
 {toc}
 <div class="how"><div><b>Ürüne dokunun</b><span>Her ürün kartı hikwo.com'daki ürün sayfasına bağlıdır.</span></div>

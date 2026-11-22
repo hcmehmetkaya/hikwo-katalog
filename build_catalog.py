@@ -368,11 +368,19 @@ def main():
     OUT.mkdir(exist_ok=True)
     from weasyprint import HTML
     doc = build_html(products, now)
-    HTML(string=doc, base_url=str(ROOT)).write_pdf(OUT / "katalog.pdf")
+    rendered = HTML(string=doc, base_url=str(ROOT)).render()
+    section_pages = {}
+    for n, pg in enumerate(rendered.pages, 1):
+        for a in pg.anchors:
+            section_pages.setdefault(a, n)
+    rendered.write_pdf(OUT / "katalog.pdf")
     size = (OUT / "katalog.pdf").stat().st_size / 1e6
-    (OUT / "index.html").write_text(landing(products, now, size), encoding="utf-8")
+    import landing as web
+    web.save_images(products, OUT)
+    page = web.render(products, group(products), section_pages, now, size, TITLE, SITE, clean_name, code_of)
+    (OUT / "index.html").write_text(page, encoding="utf-8")
     (OUT / "urunler.json").write_text(json.dumps(
-        [{k: v for k, v in p.items() if k != "imgdata"} for p in products], ensure_ascii=False, indent=1), encoding="utf-8")
+        [{k: v for k, v in p.items() if k not in ("imgdata", "web")} for p in products], ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Tamam: {len(products)} ürün, katalog.pdf {size:.1f} MB")
 
 
